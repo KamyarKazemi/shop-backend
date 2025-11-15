@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "cartItems": [{ "itemId": 101, "quantity": 1 }],
+    "CartItemsLength": { "items": 1 }
+  },
+  {
+    "id": 2,
+    "cartItems": [],
+    "CartItemsLength": { "items": 0 }
+  }
+]
