@@ -6,7 +6,7 @@
     "price": "1200 USD",
     "stock": 10,
     "details": "Titanium frame, A17 chip, 256GB",
-    "image": "http://localhost:5000/images/samsung-galaxy-s25-ultra-gray-6791f142902ce99e63fe3891.webp",
+    "image": "/images/samsung-galaxy-s25-ultra-gray-6791f142902ce99e63fe3891.webp",
     "comments": [
       { "user": "Ali", "text": "Great performance", "rating": 5 },
       { "user": "Sara", "text": "Battery is ok", "rating": 3 }
@@ -19,7 +19,7 @@
     "price": "999 USD",
     "stock": 10,
     "details": "Snapdragon, AMOLED, 12GB RAM",
-    "image": "http://localhost:5000/images/samsung-galaxy-s25-ultra-gray-6791f142902ce99e63fe3891.webp",
+    "image": "/images/samsung-galaxy-s25-ultra-gray-6791f142902ce99e63fe3891.webp",
     "comments": []
   }
 ]

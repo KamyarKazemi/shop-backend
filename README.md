@@ -66,6 +66,7 @@ This is a **mock e-commerce API** with complete shopping cart functionality.
 ## API Endpoints
 
 ### Base URL
+
 ```
 https://shop-backend.onrender.com
 ```
@@ -73,11 +74,13 @@ https://shop-backend.onrender.com
 ### Available Endpoints
 
 **Products:**
+
 - `GET /api/products` - Get all products
 - `GET /api/products/:id` - Get single product
 - `POST /api/products/:id/comments` - Add product review
 
 **Users & Shopping Cart:**
+
 - `GET /api/users` - Get all users
 - `POST /api/users/:id/cart` - Add item to cart
 - `PATCH /api/users/:id/cart/:itemId` - Update item quantity
@@ -85,6 +88,7 @@ https://shop-backend.onrender.com
 - `POST /api/users/:id/checkout` - Complete purchase
 
 **Health:**
+
 - `GET /health` - Server status check
 
 ---
@@ -96,27 +100,27 @@ This backend integrates seamlessly with React applications.
 ### Example React Code
 
 ```javascript
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
 function Products() {
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('https://shop-backend.onrender.com/api/products')
-      .then(res => res.json())
-      .then(data => setProducts(data))
-  }, [])
+    fetch("https://shop-backend.onrender.com/api/products")
+      .then((res) => res.json())
+      .then((data) => setProducts(data));
+  }, []);
 
   return (
     <div>
-      {products.map(product => (
+      {products.map((product) => (
         <div key={product.id}>
           <h3>{product.title}</h3>
           <p>${product.price}</p>
         </div>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -164,6 +168,7 @@ ENABLE_CLUSTERING=false
 ### Data Structure
 
 **Products:**
+
 ```json
 {
   "id": 1,
@@ -182,12 +187,11 @@ ENABLE_CLUSTERING=false
 ```
 
 **Users:**
+
 ```json
 {
   "id": 1,
-  "cartItems": [
-    { "itemId": 1, "quantity": 2 }
-  ],
+  "cartItems": [{ "itemId": 1, "quantity": 2 }],
   "CartItemsLength": { "items": 2 }
 }
 ```
@@ -235,6 +239,7 @@ https://shop-backend.onrender.com
 ### This Is Great For Learning
 
 Even though it's mock, you'll learn:
+
 - Real REST API patterns
 - How backend data flows to frontend
 - CRUD operations (Create, Read, Update, Delete)
@@ -247,6 +252,7 @@ Even though it's mock, you'll learn:
 ## Code Quality
 
 The code is production-grade in structure and patterns:
+
 - Clean, readable code
 - Proper error handling
 - Input validation
@@ -275,6 +281,7 @@ curl https://shop-backend.onrender.com/health
 ### Using Postman
 
 Import the endpoints above into Postman to test:
+
 1. Add requests for each endpoint
 2. Try different query parameters
 3. Test POST/PATCH/DELETE operations
@@ -302,4 +309,4 @@ ISC
 
 **Created with AI | Built for React Portfolio Projects | Hosted on Render**
 
-*This mock backend exists to help junior frontend developers like myself learn how to integrate with real APIs while focusing on what we do best - building amazing React interfaces.*
+_This mock backend exists to help junior frontend developers like myself learn how to integrate with real APIs while focusing on what we do best - building amazing React interfaces._
