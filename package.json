@@ -1,21 +1,31 @@
 {
   "name": "shop-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Optimized e-commerce backend API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test-users": "node scripts/test-users.js"
+    "start": "NODE_ENV=production node index.js",
+    "dev": "NODE_ENV=development nodemon index.js",
+    "test-users": "node scripts/test-users.js",
+    "cluster": "ENABLE_CLUSTERING=true NODE_ENV=production node index.js"
   },
-  "keywords": [],
+  "keywords": [
+    "ecommerce",
+    "api",
+    "express"
+  ],
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
