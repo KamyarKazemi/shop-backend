@@ -1,11 +1,28 @@
 [
   {
     "id": 1,
-    "cartItems": [{ "itemId": 101, "quantity": 1 }],
-    "CartItemsLength": { "items": 1 }
+    "username": "kamyar_dev",
+    "email": "kamyar@example.com",
+    "password": "SecurePass123!",
+    "createdAt": "2025-01-15T10:00:00Z",
+    "cartItems": [{ "itemId": 1, "quantity": 2 }],
+    "CartItemsLength": { "items": 2 }
   },
   {
     "id": 2,
+    "username": "john_doe",
+    "email": "john@example.com",
+    "password": "Password456!",
+    "createdAt": "2025-01-16T14:30:00Z",
+    "cartItems": [],
+    "CartItemsLength": { "items": 0 }
+  },
+  {
+    "id": 3,
+    "username": "sara_smith",
+    "email": "sara@example.com",
+    "password": "SafePassword789!",
+    "createdAt": "2025-01-16T16:45:00Z",
     "cartItems": [],
     "CartItemsLength": { "items": 0 }
   }

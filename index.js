@@ -156,8 +156,139 @@ app.get("/api/products/:id", validateProductId, async (req, res) => {
   }
 });
 
-// Other routes (POST comments, user cart, checkout) remain unchanged
-// ... your existing routes here ...
+// Users endpoints
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await readUsers();
+    res.set("Cache-Control", "public, max-age=5");
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to read users" });
+  }
+});
+
+app.get("/api/users/:id", validateUserId, async (req, res) => {
+  try {
+    const id = req.userId;
+    const users = await readUsers();
+    const user = users.find((u) => u.id === id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.set("Cache-Control", "public, max-age=5");
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to read user" });
+  }
+});
+
+app.post("/api/users", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    // Validation
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "Username, email, and password are required" });
+    }
+    if (username.length < 3) {
+      return res.status(400).json({ error: "Username must be at least 3 characters" });
+    }
+    if (!email.includes("@")) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const users = await readUsers();
+    
+    // Check if user already exists
+    if (users.find((u) => u.email === email)) {
+      return res.status(409).json({ error: "Email already registered" });
+    }
+    if (users.find((u) => u.username === username)) {
+      return res.status(409).json({ error: "Username already taken" });
+    }
+
+    const newUser = {
+      id: Math.max(...users.map((u) => u.id), 0) + 1,
+      username: username.trim(),
+      email: email.trim(),
+      password, // Note: In production, hash passwords!
+      createdAt: new Date().toISOString(),
+      cartItems: [],
+      CartItemsLength: { items: 0 },
+    };
+
+    users.push(newUser);
+    await writeUsers(users);
+
+    res.status(201).json(newUser);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create user" });
+  }
+});
+
+app.patch("/api/users/:id", validateUserId, async (req, res) => {
+  try {
+    const id = req.userId;
+    const { username, email, password } = req.body;
+    
+    const users = await readUsers();
+    const user = users.find((u) => u.id === id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Validation for updates
+    if (username && username.length < 3) {
+      return res.status(400).json({ error: "Username must be at least 3 characters" });
+    }
+    if (email && !email.includes("@")) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+    if (password && password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    // Check for duplicates (excluding current user)
+    if (email && email !== user.email && users.find((u) => u.email === email && u.id !== id)) {
+      return res.status(409).json({ error: "Email already in use" });
+    }
+    if (username && username !== user.username && users.find((u) => u.username === username && u.id !== id)) {
+      return res.status(409).json({ error: "Username already taken" });
+    }
+
+    // Update fields
+    if (username) user.username = username.trim();
+    if (email) user.email = email.trim();
+    if (password) user.password = password; // Note: In production, hash passwords!
+    user.updatedAt = new Date().toISOString();
+
+    await writeUsers(users);
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
+app.delete("/api/users/:id", validateUserId, async (req, res) => {
+  try {
+    const id = req.userId;
+    const users = await readUsers();
+    const userIndex = users.findIndex((u) => u.id === id);
+    if (userIndex === -1) return res.status(404).json({ error: "User not found" });
+
+    const deletedUser = users.splice(userIndex, 1)[0];
+    await writeUsers(users);
+
+    res.json({ message: "User deleted", user: deletedUser });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+});
 
 // Health check endpoint
 app.get("/health", (req, res) => {
