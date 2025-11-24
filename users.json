@@ -5,8 +5,11 @@
     "email": "kamyar@example.com",
     "password": "SecurePass123!",
     "createdAt": "2025-01-15T10:00:00Z",
-    "cartItems": [{ "itemId": 1, "quantity": 2 }],
-    "CartItemsLength": { "items": 2 }
+    "cartItems": [
+      { "itemId": 1, "quantity": 2 },
+      { "itemId": 2, "quantity": 1 }
+    ],
+    "CartItemsNumber": 3
   },
   {
     "id": 2,
@@ -15,7 +18,7 @@
     "password": "Password456!",
     "createdAt": "2025-01-16T14:30:00Z",
     "cartItems": [],
-    "CartItemsLength": { "items": 0 }
+    "CartItemsNumber": 0
   },
   {
     "id": 3,
@@ -23,7 +26,7 @@
     "email": "sara@example.com",
     "password": "SafePassword789!",
     "createdAt": "2025-01-16T16:45:00Z",
-    "cartItems": [],
-    "CartItemsLength": { "items": 0 }
+    "cartItems": [{ "itemId": 3, "quantity": 1 }],
+    "CartItemsNumber": 1
   }
 ]

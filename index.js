@@ -125,6 +125,11 @@ function averageRating(comments) {
   return +(sum / comments.length).toFixed(2);
 }
 
+function calculateCartItemsNumber(cartItems) {
+  if (!cartItems || !Array.isArray(cartItems)) return 0;
+  return cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+}
+
 // Routes
 app.get("/api/products", async (req, res) => {
   try {
@@ -189,20 +194,26 @@ app.post("/api/users", async (req, res) => {
 
     // Validation
     if (!username || !email || !password) {
-      return res.status(400).json({ error: "Username, email, and password are required" });
+      return res
+        .status(400)
+        .json({ error: "Username, email, and password are required" });
     }
     if (username.length < 3) {
-      return res.status(400).json({ error: "Username must be at least 3 characters" });
+      return res
+        .status(400)
+        .json({ error: "Username must be at least 3 characters" });
     }
     if (!email.includes("@")) {
       return res.status(400).json({ error: "Invalid email format" });
     }
     if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
     }
 
     const users = await readUsers();
-    
+
     // Check if user already exists
     if (users.find((u) => u.email === email)) {
       return res.status(409).json({ error: "Email already registered" });
@@ -218,7 +229,7 @@ app.post("/api/users", async (req, res) => {
       password, // Note: In production, hash passwords!
       createdAt: new Date().toISOString(),
       cartItems: [],
-      CartItemsLength: { items: 0 },
+      CartItemsNumber: 0,
     };
 
     users.push(newUser);
@@ -235,27 +246,39 @@ app.patch("/api/users/:id", validateUserId, async (req, res) => {
   try {
     const id = req.userId;
     const { username, email, password } = req.body;
-    
+
     const users = await readUsers();
     const user = users.find((u) => u.id === id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     // Validation for updates
     if (username && username.length < 3) {
-      return res.status(400).json({ error: "Username must be at least 3 characters" });
+      return res
+        .status(400)
+        .json({ error: "Username must be at least 3 characters" });
     }
     if (email && !email.includes("@")) {
       return res.status(400).json({ error: "Invalid email format" });
     }
     if (password && password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
     }
 
     // Check for duplicates (excluding current user)
-    if (email && email !== user.email && users.find((u) => u.email === email && u.id !== id)) {
+    if (
+      email &&
+      email !== user.email &&
+      users.find((u) => u.email === email && u.id !== id)
+    ) {
       return res.status(409).json({ error: "Email already in use" });
     }
-    if (username && username !== user.username && users.find((u) => u.username === username && u.id !== id)) {
+    if (
+      username &&
+      username !== user.username &&
+      users.find((u) => u.username === username && u.id !== id)
+    ) {
       return res.status(409).json({ error: "Username already taken" });
     }
 
@@ -278,7 +301,8 @@ app.delete("/api/users/:id", validateUserId, async (req, res) => {
     const id = req.userId;
     const users = await readUsers();
     const userIndex = users.findIndex((u) => u.id === id);
-    if (userIndex === -1) return res.status(404).json({ error: "User not found" });
+    if (userIndex === -1)
+      return res.status(404).json({ error: "User not found" });
 
     const deletedUser = users.splice(userIndex, 1)[0];
     await writeUsers(users);
@@ -287,6 +311,99 @@ app.delete("/api/users/:id", validateUserId, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
+// Cart endpoints
+app.post("/api/users/:id/cart", validateUserId, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { itemId, quantity } = req.body;
+
+    if (!itemId || !quantity) {
+      return res
+        .status(400)
+        .json({ error: "itemId and quantity are required" });
+    }
+    if (quantity < 1) {
+      return res.status(400).json({ error: "Quantity must be at least 1" });
+    }
+
+    const users = await readUsers();
+    const user = users.find((u) => u.id === userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Check if item already in cart
+    const existingItem = user.cartItems.find((item) => item.itemId === itemId);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      user.cartItems.push({ itemId, quantity });
+    }
+
+    user.CartItemsNumber = calculateCartItemsNumber(user.cartItems);
+    await writeUsers(users);
+
+    res.json({ message: "Item added to cart", user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to add item to cart" });
+  }
+});
+
+app.patch("/api/users/:id/cart/:itemId", validateUserId, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const itemId = Number(req.params.itemId);
+    const { quantity } = req.body;
+
+    if (quantity === undefined) {
+      return res.status(400).json({ error: "quantity is required" });
+    }
+    if (quantity < 0) {
+      return res.status(400).json({ error: "Quantity cannot be negative" });
+    }
+
+    const users = await readUsers();
+    const user = users.find((u) => u.id === userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const cartItem = user.cartItems.find((item) => item.itemId === itemId);
+    if (!cartItem) return res.status(404).json({ error: "Item not in cart" });
+
+    if (quantity === 0) {
+      user.cartItems = user.cartItems.filter((item) => item.itemId !== itemId);
+    } else {
+      cartItem.quantity = quantity;
+    }
+
+    user.CartItemsNumber = calculateCartItemsNumber(user.cartItems);
+    await writeUsers(users);
+
+    res.json({ message: "Cart updated", user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update cart" });
+  }
+});
+
+app.delete("/api/users/:id/cart/:itemId", validateUserId, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const itemId = Number(req.params.itemId);
+
+    const users = await readUsers();
+    const user = users.find((u) => u.id === userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    user.cartItems = user.cartItems.filter((item) => item.itemId !== itemId);
+    user.CartItemsNumber = calculateCartItemsNumber(user.cartItems);
+    await writeUsers(users);
+
+    res.json({ message: "Item removed from cart", user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to remove item from cart" });
   }
 });
 
