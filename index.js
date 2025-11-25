@@ -188,6 +188,8 @@ app.get("/api/users/:id", validateUserId, async (req, res) => {
   }
 });
 
+// Add this to your index.js - Replace the POST /api/users endpoint
+
 app.post("/api/users", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -214,18 +216,30 @@ app.post("/api/users", async (req, res) => {
 
     const users = await readUsers();
 
-    // Check if user already exists
-    if (users.find((u) => u.email === email)) {
-      return res.status(409).json({ error: "Email already registered" });
+    // ✅ Check if email already exists
+    const existingEmail = users.find((u) => u.email === email.toLowerCase());
+    if (existingEmail) {
+      return res.status(409).json({
+        error: "Email already registered",
+        field: "email",
+      });
     }
-    if (users.find((u) => u.username === username)) {
-      return res.status(409).json({ error: "Username already taken" });
+
+    // ✅ Check if username already exists
+    const existingUsername = users.find(
+      (u) => u.username.toLowerCase() === username.toLowerCase()
+    );
+    if (existingUsername) {
+      return res.status(409).json({
+        error: "Username already taken",
+        field: "username",
+      });
     }
 
     const newUser = {
       id: Math.max(...users.map((u) => u.id), 0) + 1,
       username: username.trim(),
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password, // Note: In production, hash passwords!
       createdAt: new Date().toISOString(),
       cartItems: [],
@@ -239,6 +253,37 @@ app.post("/api/users", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create user" });
+  }
+});
+
+// ✅ ADD NEW ENDPOINT: Check if username/email exists (for real-time validation)
+app.post("/api/users/check-availability", async (req, res) => {
+  try {
+    const { username, email } = req.body;
+    const users = await readUsers();
+
+    const result = {
+      usernameAvailable: true,
+      emailAvailable: true,
+      message: "",
+    };
+
+    if (username) {
+      const usernameTaken = users.some(
+        (u) => u.username.toLowerCase() === username.toLowerCase()
+      );
+      result.usernameAvailable = !usernameTaken;
+    }
+
+    if (email) {
+      const emailTaken = users.some((u) => u.email === email.toLowerCase());
+      result.emailAvailable = !emailTaken;
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to check availability" });
   }
 });
 
