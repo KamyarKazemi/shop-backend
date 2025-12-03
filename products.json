@@ -14,12 +14,12 @@
   },
   {
     "id": 2,
-    "title": "Samsung S24",
+    "title": "Samsung S24 Ultra",
     "caption": "New Android beast",
     "price": "999 USD",
     "stock": 10,
     "details": "Snapdragon, AMOLED, 12GB RAM",
-    "image": "samsung-galaxy-s25-ultra-gray-6791f142902ce99e63fe3891.webp",
+    "image": "24.png",
     "comments": []
   }
 ]
